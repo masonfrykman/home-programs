@@ -84,7 +84,9 @@ print(Fore.GREEN + 'Sorted!')
 print(Fore.CYAN + '\nStarting to delete ' + str(AMOUNT_TO_DELETE) + " bytes of the oldest files in '" + CAMERA_DUMP_DIRECTORY + "'.")
 
 if(AMOUNT_TO_DELETE <= 0):
-    print('ERROR! AMOUNT_TO_DELETE cannot be 0 or lower. Change the value to be above zero please.')
+    print(Fore.RED'ERROR! AMOUNT_TO_DELETE cannot be 0 or lower. Change the value to be above zero please.')
+    print('Exiting without deleting.')
+    raise SystemExit
 
 amountOfBytesDeleted = 0
 
