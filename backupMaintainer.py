@@ -23,10 +23,10 @@ if(DO_DISKSPACE_CHECK == True):
     print(Fore.CYAN + 'Running Diskspace Check...')
     totalFree = disk_usage(CAMERA_DUMP_DIRECTORY).free
     if(totalFree > KILL_SELF_IF_DISKSPACE_IS_ABOVE):
-        print(Fore.YELLOW + 'Disk space free is above the defined byte amount. Killing self.')
+        print(Fore.YELLOW + 'Disk space free is above the defined byte amount to start deletion. Exitting.')
         raise SystemExit
     else:
-        print(Fore.GREEN + 'Disk Space')
+        print(Fore.GREEN + 'Disk Space is under the amount of free space required to stop execution. Proceeding.')
 else:
     print(Fore.CYAN + 'Diskspace Check is disabled.')
 
