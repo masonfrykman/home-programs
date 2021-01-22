@@ -3,9 +3,8 @@
 # some variables that are going to be at the top so they can be easily changed later.
 
 CAMERA_DUMP_DIRECTORY = '' # the directory that the script will be active in. start from the root folder. Use forward slashes.
-AMOUNT_TO_DELETE = 2000000000 # the maximum amount of data to delete IN BYTES. May go over a bit just because we dont want incomplete and corrupted files. 1 gigabyte = 1000000000 bytes
+KILL_SELF_IF_DISKSPACE_IS_ABOVE = 15000000000 # Will check if the disk's free space is above this. If it is, the script will kill itself, if not it will proceed. 1 gigabyte = 1000000000 bytes
 DO_DISKSPACE_CHECK = True # This is if you want to turn off the diskspace check. Turn to False if you want it off. Turn to True if you want it on.
-KILL_SELF_IF_DISKSPACE_IS_ABOVE = 10000000000 # Will check if the disk's free space is above this. If it is, the script will kill itself, if not it will proceed. 1 gigabyte = 1000000000 bytes
 WRITE_TO_LOG = True # sets if it will write to bm.log
 
 # Essential imports to have this file work.
@@ -21,7 +20,7 @@ today = datetime.now()
 
 def toLog(message, wlvl):
     if(WRITE_TO_LOG == True):
-        log = open('bm.log', 'a')
+        log = open('./bm.log', 'a')
         if(message == 'Initializing Backup Manager'):
             log.write('\n\n[{} '.format(wlvl) + today.strftime("%d.%m.%Y %H:%M:%S] ") + message)
         else:
@@ -117,13 +116,15 @@ toLog('Sorted', 'INFO')
 
 # Now start the deleting!!!
 
-print(Fore.CYAN + '\nStarting to delete ' + str(AMOUNT_TO_DELETE) + " bytes of the oldest files in '" + CAMERA_DUMP_DIRECTORY + "'.")
-toLog('Starting to delete ' + str(AMOUNT_TO_DELETE) + " bytes of the oldest files in '" + CAMERA_DUMP_DIRECTORY + "'.", 'INFO')
+toOut = 'Starting to delete data until free space of ' + str(disk_usage(CAMERA_DUMP_DIRECTORY).free)
 
-if(AMOUNT_TO_DELETE <= 0):
-    print(Fore.RED + 'ERROR! AMOUNT_TO_DELETE cannot be 0 or lower. Change the value to be above zero please.')
+print(Fore.CYAN + '\n' + toOut)
+toLog(toOut, 'INFO')
+
+if(KILL_SELF_IF_DISKSPACE_IS_ABOVE <= 0):
+    print(Fore.RED + 'ERROR! KILL_SELF_IF_DISKSPACE_IS_ABOVE cannot be 0 or lower. Change the value to be above zero please.')
     print('Exiting without deleting.')
-    toLog('ERROR! AMOUNT_TO_DELETE cannot be 0 or lower. Change the value to be above zero please. Exiting', 'ERROR')
+    toLog('ERROR! KILL_SELF_IF_DISKSPACE_IS_ABOVE cannot be 0 or lower. Change the value to be above zero please. Exiting', 'ERROR')
     raise SystemExit
 
 amountOfBytesDeleted = 0
@@ -132,7 +133,7 @@ for fileTD in d:
     b = os.stat(fileTD).st_size
     os.remove(fileTD)
     amountOfBytesDeleted += b
-    if(amountOfBytesDeleted > AMOUNT_TO_DELETE):
+    if(disk_usage(CAMERA_DUMP_DIRECTORY).free >= KILL_SELF_IF_DISKSPACE_IS_ABOVE):
         break
 
 print(Fore.GREEN + 'Successfully deleted ' + str(amountOfBytesDeleted) + ' bytes of data!')
