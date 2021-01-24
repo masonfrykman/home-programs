@@ -5,9 +5,37 @@
 
 # Useful variables
 
-THUMB_DRIVE_FDIR = '' # Start from /
-MOVE_FILES_TO = '' # Start from /
-COMBINED_FLDR_NAME = ''
+import configparser
+
+cfg = configparser.ConfigParser()
+cfg.read('configs.ini')
+if('Dumper' in cfg == False):
+    print('configs.ini: There is no Dumper section in configs.ini. Please make one or correct any typos.')
+    raise SystemExit
+
+dumpcfg = cfg['Dumper']
+
+try:
+    x = dumpcfg['StartingDirectory']
+except KeyError:
+    print('configs.ini: Cannot get key StartingDirectory. Please make one under the Dumper section.')
+    raise SystemExit
+
+try:
+    x = dumpcfg['DumpPath']
+except KeyError:
+    print('configs.ini: Cannot get key DumpPath. Please make one under the Dumper section.')
+    raise SystemExit
+
+try:
+    x = dumpcfg['DumpFolderName']
+except KeyError:
+    print('configs.ini: Cannot get key DumpFolderName. Please make one under the Dumper section.')
+    raise SystemExit
+
+THUMB_DRIVE_FDIR = dumpcfg['StartingDirectory']
+MOVE_FILES_TO = dumpcfg['DumpPath']
+COMBINED_FLDR_NAME = dumpcfg['DumpFolderName']
 
 # Imports
 
