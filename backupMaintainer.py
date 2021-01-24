@@ -1,10 +1,7 @@
 #!/usr/bin/env python
 
-# some variables that are going to be at the top so they can be easily changed later.
+# The 3 other variables are now stored in configs.ini. We just have WRITE_TO_LOG so that they can write to log if 
 
-CAMERA_DUMP_DIRECTORY = '' # the directory that the script will be active in. start from the root folder. Use forward slashes.
-KILL_SELF_IF_DISKSPACE_IS_ABOVE = 15000000000 # Will check if the disk's free space is above this. If it is, the script will kill itself, if not it will proceed. 1 gigabyte = 1000000000 bytes
-DO_DISKSPACE_CHECK = True # This is if you want to turn off the diskspace check. Turn to False if you want it off. Turn to True if you want it on.
 WRITE_TO_LOG = True # sets if it will write to bm.log
 
 # Essential imports to have this file work.
@@ -13,6 +10,7 @@ import os
 from colorama import Fore, init
 from shutil import disk_usage
 from datetime import datetime
+import configparser
 
 init(autoreset=True)
 
@@ -28,10 +26,76 @@ def toLog(message, wlvl):
         log.close()
 
 
-# Initialize the log.
-
-toLog('Initializing Backup Manager', 'INFO')
 print('Backup Maintainer :)\n')
+
+# Get variables from INI file.
+
+cfg = configparser.ConfigParser()
+cfg.read('configs.ini')
+if('BackupMaintainer' in cfg == False):
+    print(Fore.RED + 'configs.ini: There is no section in configs.ini called BackupMaintainer! Please fix the issue.')
+    toLog('configs.ini: There is no section in configs.ini called BackupMaintainer! Please fix the issue.', 'ERROR')
+    raise SystemExit
+
+bkkeys = cfg['BackupMaintainer']
+
+try:
+    x = bkkeys['WriteToLog']
+except KeyError:
+    out = "configs.ini: Cannot get the key 'WriteToLog' from the BackupMaintainer section."
+    print(Fore.RED + out)
+    toLog(out, 'ERROR')
+    raise SystemExit
+
+try:
+    x = bkkeys['CameraDumpDirectory']
+except KeyError:
+    out = "configs.ini: Cannot get the key 'CameraDumpDirectory' from the BackupMaintainer section."
+    print(Fore.RED + out)
+    toLog(out, 'ERROR')
+    raise SystemExit
+
+try:
+    x = bkkeys['KillIfAboveBytes']
+except KeyError:
+    out = "configs.ini: Cannot get the key 'KillIfAboveBytes' from the BackupMaintainer section."
+    print(Fore.RED + out)
+    toLog(out, 'ERROR')
+    raise SystemExit
+
+try:
+    x = bkkeys['DiskFreeCheck']
+except KeyError:
+    out = "configs.ini: Cannot get the key 'DiskFreeCheck' from the BackupMaintainer section."
+    print(Fore.RED + out)
+    toLog(out, 'ERROR')
+    raise SystemExit
+
+CAMERA_DUMP_DIRECTORY = bkkeys['CameraDumpDirectory']
+KILL_SELF_IF_DISKSPACE_IS_ABOVE = int(bkkeys['KillIfAboveBytes'])
+DO_DISKSPACE_CHECK_STR = bkkeys['DiskFreeCheck']
+WRITE_TO_LOG_STR = bkkeys['WriteToLog']
+
+if(DO_DISKSPACE_CHECK_STR.lower() == 'yes'):
+    DO_DISKSPACE_CHECK = True
+elif(DO_DISKSPACE_CHECK_STR.lower() == 'no'):
+    DO_DISKSPACE_CHECK = False
+else:
+    out2 = 'configs.ini: DiskFreeCheck is not "yes" or "no". Check the key to make sure it is correct.'
+    print(Fore.RED + out2)
+    toLog(out2, 'ERROR')
+    raise SystemExit
+
+if(WRITE_TO_LOG_STR.lower() == 'yes'):
+    WRITE_TO_LOG = True
+elif(WRITE_TO_LOG_STR.lower() == 'no'):
+    WRITE_TO_LOG = False
+else:
+    out3 = 'configs.ini: WriteToLog is not "yes" or "no". Check the key to make sure it is correct. Defaulting to yes.' # This not being set isn't catastrophic.
+    toLog(out3, 'WARN')
+    print(Fore.YELLOW + out3)
+
+toLog('Running Backup Manager with Configs set.', 'INFO')
 
 # First, check if the Diskspace check is on, then do stuff accordingly.
 
