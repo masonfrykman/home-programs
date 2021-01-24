@@ -27,15 +27,68 @@ except KeyError:
     raise SystemExit
 
 ROOT_DIRECTORY = clcfg['RootDirectory']
-COMBINED_DIRECTORY = clcfg['RootDirectory']
+COMBINED_DIRECTORY = clcfg['CombinedDirectory']
+
+print(ROOT_DIRECTORY)
+print(COMBINED_DIRECTORY)
 
 import os
-import subprocess
 
-def bm_start(path):
-    with os.scandir(path) as it:
+class Directory:
+    def __init__(self, path, level):
+        self.path = path
+        self.level = level
+        self.isDeleted = False
+        self.shouldSkipDelete = False
+
+foundpaths = []
+
+
+
+def bm_scanPath(pathz):
+    with os.scandir(pathz.path) as it:
         for entry in it:
-            print(entry.path)
-            
+            print('Found: ' + entry.path)
+            if(entry.name == 'System Volume Information'):
+                print('Skipping SVI')
+            elif(entry.path == COMBINED_DIRECTORY):
+                print('Skipping Combined Directory')
+            else:
+                if(os.path.isdir(entry.path) == False):
+                    print('Not a directory')
+                else:
+                    newDir = Directory(entry.path, pathz.level + 1)
+                    foundpaths.append(newDir)
+                    bm_scanPath(newDir)
 
-bm_start(ROOT_DIRECTORY)
+rootdir = Directory(ROOT_DIRECTORY, 1)
+
+bm_scanPath(rootdir)
+
+# Get the max level
+
+maxLevel = 0
+
+for ent in foundpaths:
+    if(ent.level > maxLevel):
+        maxLevel = ent.level
+        print('Elevated to Level ' + str(maxLevel))
+
+print(foundpaths)
+for ent in foundpaths:
+    print(ent.path)
+    print(ent.path.upper() + ' '  + str(ent.level))
+
+while True:
+    for ent in foundpaths:
+        if(ent.level == maxLevel):
+            try:
+                os.rmdir(ent.path)
+            except OSError:
+                pass
+
+    maxLevel -= 1
+    if(maxLevel < 0):
+        break
+
+
