@@ -1,9 +1,3 @@
-# Home Scripts
+# backup maintainer
 
-Scripts that I made for my own home network.
-
-Each project might have its own LICENSE file, please see that before using.
-
-## Contents
-- Effronte
-- backupMaintainer (camBackup)
+made to maintain a raspberry pi for our security camera backup.
